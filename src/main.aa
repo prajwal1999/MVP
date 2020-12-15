@@ -1,0 +1,13 @@
+#include decls.aa
+#include readMatrix.aa
+#include readVector.aa
+#include sendVector.aa
+
+#define DOTNAME dotP_even
+#include dotP.aa
+
+#define DOTNAME dotP_odd
+#include dotP.aa
+
+#include multiplyMatrixVector.aa
+#include mvp_daemon.aa

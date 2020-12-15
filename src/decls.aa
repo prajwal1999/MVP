@@ -1,0 +1,31 @@
+// matrix order.
+$parameter MATRIX_ORDER 	32
+
+// storage for the matrix A
+// stores xth column st. {x mod 4 == 0 }  
+$storage A_0: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 1 }  
+$storage A_1: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 2 }  
+$storage A_2: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 3 }  
+$storage A_3: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+
+// storage for input vector x
+// stores ith value st. {i mod 4 == 0 }
+$storage x_0: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 1 }
+$storage x_1: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 2 }
+$storage x_2: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 3 }
+$storage x_3: $array [{MATRIX_ORDER/4}] $of $uint<32>
+
+// storage for output vector y.
+$storage y: $array [MATRIX_ORDER] $of $uint<32>
+
+// in-data pipe
+$pipe in_data: $uint<32> $depth 2
+
+// out-data pipe
+$pipe out_data: $uint<32> $depth 2

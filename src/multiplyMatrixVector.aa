@@ -1,0 +1,22 @@
+// main module which performs A.x = y. assumes that A, x are available.
+$module [multiplyMatrixVector] $in () $out () $is
+{
+	// dot product loop
+	$branchblock[mmloop] {
+		$merge $entry loopback 
+			$phi R := ($bitcast ($uint<8>) 0) $on $entry nR $on loopback
+		$endmerge
+
+			$call dotP_even (R) (val_even)
+			$call dotP_odd ((R+1)) (val_odd)
+
+			y[R] := val_even
+			y[(R+1)] := val_odd
+
+			nR := (R + 1)
+		$if (nR < MATRIX_ORDER) $then
+			$place [loopback]
+		$endif
+
+	}
+}

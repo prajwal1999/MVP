@@ -1,0 +1,44 @@
+// dot product of the R'th row of A with the vector x. This gives the R'th element of Y.
+$module [ ##DOTNAME ] $in (R: $uint<8>) $out (result: $uint<32>) $is
+{
+	$branchblock[mmloop] {
+		$dopipeline $depth 15 $fullrate
+			$merge $entry $loopback 
+				$phi C := ($bitcast ($uint<8>) 0) $on $entry nC $on $loopback
+				$phi val_0 := ($bitcast ($uint<32>) 0) $on $entry nval_0 $on $loopback
+				$phi val_1 := ($bitcast ($uint<32>) 0) $on $entry nval_1 $on $loopback
+				$phi val_2 := ($bitcast ($uint<32>) 0) $on $entry nval_2 $on $loopback
+				$phi val_3 := ($bitcast ($uint<32>) 0) $on $entry nval_3 $on $loopback
+			$endmerge
+
+			$volatile Cr := ($slice C 7 2)
+
+			// Parallel reads from different memories
+			a_rc_0 := A_0[R][Cr]
+			a_rc_1 := A_1[R][Cr]
+			a_rc_2 := A_2[R][Cr]
+			a_rc_3 := A_3[R][Cr]
+
+			xval_0 := x_0[Cr]
+			xval_1 := x_1[Cr]
+			xval_2 := x_2[Cr]
+			xval_3 := x_3[Cr]
+
+			$volatile nval_0 := (val_0 + (a_rc_0 * xval_0))
+			$rreport (##DOTNAME Cr_0 val_0 a_rc_0 xval_0 nval_0)
+
+			$volatile nval_1 := (val_1 + (a_rc_1 * xval_1))
+			$rreport (##DOTNAME Cr_1 val_1 a_rc_1 xval_1 nval_1)
+
+			$volatile nval_2 := (val_2 + (a_rc_2 * xval_2))
+			$rreport (##DOTNAME Cr_2 val_2 a_rc_2 xval_2 nval_2)
+
+			$volatile nval_3 := (val_3 + (a_rc_3 * xval_3))
+			$rreport (##DOTNAME Cr_3 val_3 a_rc_3 xval_3 nval_3)
+
+			nC := (C + 4)
+
+		$while (nC < MATRIX_ORDER)
+	} (nval_0=>nval_0 nval_1=>nval_1 nval_2=>nval_2 nval_3=>nval_3 )
+	result := ( nval_0 + (nval_1 + (nval_2 + nval_3) ) )
+}

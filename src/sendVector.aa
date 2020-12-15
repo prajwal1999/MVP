@@ -1,0 +1,13 @@
+// helper module which sends the calculated value of y to the external world.
+$module [sendVector] $in () $out () $is
+{
+	$branchblock [loop] {
+		$dopipeline $depth 7 $fullrate
+			$merge $entry $loopback
+				$phi I := ($bitcast ($uint<8>) 0) $on $entry nI $on $loopback
+			$endmerge 
+			out_data := y[I]
+			$volatile nI := (I + 1)
+		$while (nI < MATRIX_ORDER)
+	}
+}

@@ -1,5 +1,8 @@
 rm -rf .Aa
 mkdir .Aa
+# preprocess.
+AaPreprocess -I src/  src/main.aa -o src/mvp.aa
+# link
 AaLinkExtMem src/mvp.aa | vcFormat > .Aa/mvp.linked.aa 
 # aa2c model.
 TOPMODULES="-T mvp_daemon"

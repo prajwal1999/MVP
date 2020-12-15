@@ -131,10 +131,8 @@ $module [sendVector] $in () $out () $is
 	}
 }
 
-
-
 // dot product of the R'th row of A with the vector x. This gives the R'th element of Y.
-$module [ dotP_even ] $in (R: $uint<8>) $out (result: $uint<32>) $is
+$module [dotP_even] $in (R: $uint<8>) $out (result: $uint<32>) $is
 {
 	$branchblock[mmloop] {
 		$dopipeline $depth 15 $fullrate
@@ -160,16 +158,16 @@ $module [ dotP_even ] $in (R: $uint<8>) $out (result: $uint<32>) $is
 			xval_3 := x_3[Cr]
 
 			$volatile nval_0 := (val_0 + (a_rc_0 * xval_0))
-			$rreport (dotP_even Cr_0 val_0 a_rc_0 xval_0 nval_0)
+			$rreport (dotP_even_row Cr_0 val_0 a_rc_0 xval_0 nval_0)
 
 			$volatile nval_1 := (val_1 + (a_rc_1 * xval_1))
-			$rreport (dotP_even Cr_1 val_1 a_rc_1 xval_1 nval_1)
+			$rreport (dotP_even_row Cr_1 val_1 a_rc_1 xval_1 nval_1)
 
 			$volatile nval_2 := (val_2 + (a_rc_2 * xval_2))
-			$rreport (dotP_even Cr_2 val_2 a_rc_2 xval_2 nval_2)
+			$rreport (dotP_even_row Cr_2 val_2 a_rc_2 xval_2 nval_2)
 
 			$volatile nval_3 := (val_3 + (a_rc_3 * xval_3))
-			$rreport (dotP_even Cr_3 val_3 a_rc_3 xval_3 nval_3)
+			$rreport (dotP_even_row Cr_3 val_3 a_rc_3 xval_3 nval_3)
 
 			nC := (C + 4)
 
@@ -178,10 +176,7 @@ $module [ dotP_even ] $in (R: $uint<8>) $out (result: $uint<32>) $is
 	result := ( nval_0 + (nval_1 + (nval_2 + nval_3) ) )
 }
 
-
-
-// dot product of the R'th row of A with the vector x. This gives the R'th element of Y.
-$module [ dotP_odd ] $in (R: $uint<8>) $out (result: $uint<32>) $is
+$module [dotP_odd] $in (R: $uint<8>) $out (result: $uint<32>) $is
 {
 	$branchblock[mmloop] {
 		$dopipeline $depth 15 $fullrate
@@ -207,16 +202,16 @@ $module [ dotP_odd ] $in (R: $uint<8>) $out (result: $uint<32>) $is
 			xval_3 := x_3[Cr]
 
 			$volatile nval_0 := (val_0 + (a_rc_0 * xval_0))
-			$rreport (dotP_odd Cr_0 val_0 a_rc_0 xval_0 nval_0)
+			$rreport (dotP_odd_row Cr_0 val_0 a_rc_0 xval_0 nval_0)
 
 			$volatile nval_1 := (val_1 + (a_rc_1 * xval_1))
-			$rreport (dotP_odd Cr_1 val_1 a_rc_1 xval_1 nval_1)
+			$rreport (dotP_odd_row Cr_1 val_1 a_rc_1 xval_1 nval_1)
 
 			$volatile nval_2 := (val_2 + (a_rc_2 * xval_2))
-			$rreport (dotP_odd Cr_2 val_2 a_rc_2 xval_2 nval_2)
+			$rreport (dotP_odd_row Cr_2 val_2 a_rc_2 xval_2 nval_2)
 
 			$volatile nval_3 := (val_3 + (a_rc_3 * xval_3))
-			$rreport (dotP_odd Cr_3 val_3 a_rc_3 xval_3 nval_3)
+			$rreport (dotP_odd_row Cr_3 val_3 a_rc_3 xval_3 nval_3)
 
 			nC := (C + 4)
 

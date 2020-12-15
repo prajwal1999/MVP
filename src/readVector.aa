@@ -1,0 +1,35 @@
+// helper module which reads the vector x.
+$module [readVector] $in () $out () $is
+{
+	$branchblock [loop] {
+		$dopipeline $depth 7 $fullrate
+			$merge $entry $loopback
+				$phi I := ($bitcast ($uint<8>) 0) $on $entry nI $on $loopback
+			$endmerge 
+
+			$volatile I_idx := ($slice I 1 0)
+			$volatile Ir := ($slice I 7 2)
+
+			temp_val := in_data
+
+			$volatile I_idx_0 := (I_idx == 0)
+			$volatile I_idx_1 := (I_idx == 1)
+			$volatile I_idx_2 := (I_idx == 2)
+			$volatile I_idx_3 := (I_idx == 3)
+
+			$guard (I_idx_0) x_0[Ir] := temp_val
+			$guard (I_idx_0) $rreport (readInput_with_I_idx_0   I_idx_0 I I_idx Ir temp_val)
+
+			$guard (I_idx_1) x_1[Ir] := temp_val
+			$guard (I_idx_1) $rreport (readInput_with_I_idx_1   I_idx_1 I I_idx Ir temp_val)
+
+			$guard (I_idx_2) x_2[Ir] := temp_val
+			$guard (I_idx_2) $rreport (readInput_with_I_idx_2   I_idx_2 I I_idx Ir temp_val)
+
+			$guard (I_idx_3) x_3[Ir] := temp_val
+			$guard (I_idx_3) $rreport (readInput_with_I_idx_3   I_idx_3 I I_idx Ir temp_val)
+
+			$volatile nI := (I + 1)
+		$while (nI < MATRIX_ORDER)
+	}
+}

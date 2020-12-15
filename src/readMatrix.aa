@@ -1,0 +1,50 @@
+// helper module for reading the matrix and  populating the A array.
+$module [readMatrix] $in () $out () $is
+{
+	$branchblock[mRead] {
+
+		$merge $entry outer_loopback
+			$phi I := ($bitcast ($uint<8>) 0) $on $entry nI $on outer_loopback
+		$endmerge
+
+
+			nI := (I + 1) 
+			$merge $entry inner_loopback
+				$phi J := ($bitcast ($uint<8>) 0) $on $entry nJ $on inner_loopback
+			$endmerge 
+			nJ := (J + 1)
+
+			$volatile J_idx := ($slice J 1 0)
+			Jr := ($slice J 7 2)
+
+			aval := in_data
+
+			$volatile J_idx_0 := (J_idx == 0)
+			$volatile J_idx_1 := (J_idx == 1)
+			$volatile J_idx_2 := (J_idx == 2)
+			$volatile J_idx_3 := (J_idx == 3)
+
+			// Assign A matrix to A0, A1, A2, A3 storages
+
+			$guard (J_idx_0) A_0[I][Jr] := aval
+			$guard (J_idx_0) $rreport (readMatrix_with_J_idx_0   J_idx_0 I J Jr aval)
+
+			$guard (J_idx_1) A_1[I][Jr] := aval
+			$guard (J_idx_1) $rreport (readMatrix_with_J_idx_1  J_idx I J Jr aval)
+
+			$guard (J_idx_2) A_2[I][Jr] := aval
+			$guard (J_idx_2) $rreport (readMatrix_with_J_idx_2  J_idx I J Jr aval)
+
+			$guard (J_idx_3) A_3[I][Jr] := aval
+			$guard (J_idx_3) $rreport (readMatrix_with_J_idx_3  J_idx I J Jr aval)
+
+
+			$if (nJ < MATRIX_ORDER) $then
+				$place [inner_loopback]
+			$endif
+				
+		$if (nI < MATRIX_ORDER) $then
+				$place [outer_loopback]
+		$endif
+	}
+}

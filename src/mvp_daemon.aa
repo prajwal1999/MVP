@@ -1,0 +1,18 @@
+// main thread: reads the matrix, and works on vectors..
+$module [mvp_daemon] $in () $out () $is
+{
+	// read the matrix.
+	$call readMatrix () ()
+
+	$branchblock [loop] {
+
+		$merge $entry loopback $endmerge
+
+		$call readVector () ()
+		$call multiplyMatrixVector () ()
+		$call sendVector () ()
+
+		$place [loopback]
+	}
+}
+

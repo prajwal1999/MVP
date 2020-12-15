@@ -8,11 +8,17 @@ $module [mvp_daemon] $in () $out () $is
 
 		$merge $entry loopback $endmerge
 
+<<<<<<< HEAD
 		$rreport (InputReadStarted Input_Read)
 		$call readVector () ()
 		$call multiplyMatrixVector () ()
 		$call sendVector () ()
 		$rreport (OutputReceived Output_Sent)
+=======
+		$call readVector () ()
+		$call multiplyMatrixVector () ()
+		$call sendVector () ()
+>>>>>>> eb195423f5b9041da92b7e2c4b2cd451b47fe109
 
 		$place [loopback]
 	}

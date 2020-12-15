@@ -1,16 +1,24 @@
-$storage  A_0 : $array[32][16] $of $uint<32> // memory space index = 0  base address = 0  word size = 32
+$storage  A_0 : $array[32][8] $of $uint<32> // memory space index = 0  base address = 0  word size = 32
 // can point into 
-$storage  A_1 : $array[32][16] $of $uint<32> // memory space index = 1  base address = 0  word size = 32
+$storage  A_1 : $array[32][8] $of $uint<32> // memory space index = 1  base address = 0  word size = 32
+// can point into 
+$storage  A_2 : $array[32][8] $of $uint<32> // memory space index = 2  base address = 0  word size = 32
+// can point into 
+$storage  A_3 : $array[32][8] $of $uint<32> // memory space index = 3  base address = 0  word size = 32
 // can point into 
 $pipe  in_data : $uint<32>  $depth 2 
 // can point into 
 $pipe  out_data : $uint<32>  $depth 2 
 // can point into 
-$storage  x_0 : $array[16] $of $uint<32> // memory space index = 2  base address = 0  word size = 32
+$storage  x_0 : $array[8] $of $uint<32> // memory space index = 4  base address = 0  word size = 32
 // can point into 
-$storage  x_1 : $array[16] $of $uint<32> // memory space index = 3  base address = 0  word size = 32
+$storage  x_1 : $array[8] $of $uint<32> // memory space index = 5  base address = 0  word size = 32
 // can point into 
-$storage  y : $array[32] $of $uint<32> // memory space index = 4  base address = 0  word size = 32
+$storage  x_2 : $array[8] $of $uint<32> // memory space index = 6  base address = 0  word size = 32
+// can point into 
+$storage  x_3 : $array[8] $of $uint<32> // memory space index = 7  base address = 0  word size = 32
+// can point into 
+$storage  y : $array[32] $of $uint<32> // memory space index = 8  base address = 0  word size = 32
 // can point into 
 $module [dotP_even]
 $in ( R : $uint<8>  )
@@ -24,25 +32,37 @@ $is
     $merge $entry $loopback 
     $phi C := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nC $on   $loopback 
     // type of target is $uint<8>
-    $phi val_even := 			  nval_even $on   $loopback 			  ($bitcast ($uint<32>) 0  ) $on   $entry 
+    $phi val_0 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_0 $on   $loopback 
     // type of target is $uint<32>
-    $phi val_odd := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_odd $on   $loopback 
+    $phi val_1 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_1 $on   $loopback 
+    // type of target is $uint<32>
+    $phi val_2 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_2 $on   $loopback 
+    // type of target is $uint<32>
+    $phi val_3 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_3 $on   $loopback 
     // type of target is $uint<32>
     $endmerge
-    $volatile Cr := ( $slice C 7 1 )  $buffering 1
-    a_rc_even := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
-    a_rc_odd := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
-    xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
-    xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
-    $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
-    $report (dotP_even even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
-    $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
-    $report (dotP_even odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
-    nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
+    $volatile Cr := ( $slice C 7 2 )  $buffering 1
+    a_rc_0 := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_1 := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_2 := A_2[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_3 := A_3[R][Cr] $buffering 1// bits of buffering = 32. 
+    xval_0 := x_0[Cr] $buffering 1// bits of buffering = 32. 
+    xval_1 := x_1[Cr] $buffering 1// bits of buffering = 32. 
+    xval_2 := x_2[Cr] $buffering 1// bits of buffering = 32. 
+    xval_3 := x_3[Cr] $buffering 1// bits of buffering = 32. 
+    $volatile nval_0 := (val_0 + (a_rc_0 * xval_0)) $buffering 1
+    $report (dotP_even_row Cr_0 			 val_0 val_0 			 a_rc_0 a_rc_0 			 xval_0 xval_0 			 nval_0 nval_0 )
+    $volatile nval_1 := (val_1 + (a_rc_1 * xval_1)) $buffering 1
+    $report (dotP_even_row Cr_1 			 val_1 val_1 			 a_rc_1 a_rc_1 			 xval_1 xval_1 			 nval_1 nval_1 )
+    $volatile nval_2 := (val_2 + (a_rc_2 * xval_2)) $buffering 1
+    $report (dotP_even_row Cr_2 			 val_2 val_2 			 a_rc_2 a_rc_2 			 xval_2 xval_2 			 nval_2 nval_2 )
+    $volatile nval_3 := (val_3 + (a_rc_3 * xval_3)) $buffering 1
+    $report (dotP_even_row Cr_3 			 val_3 val_3 			 a_rc_3 a_rc_3 			 xval_3 xval_3 			 nval_3 nval_3 )
+    nC := (C + 4 ) $buffering 1// bits of buffering = 8. 
     $while (nC < 32)
   }
-  ( nval_even => nval_even  nval_odd => nval_odd )
-  result := (nval_even + nval_odd) $buffering 1// bits of buffering = 32. 
+  ( nval_0 => nval_0  nval_1 => nval_1  nval_2 => nval_2  nval_3 => nval_3 )
+  result := (nval_0 + (nval_1 + (nval_2 + nval_3))) $buffering 1// bits of buffering = 32. 
 }
 $module [dotP_odd]
 $in ( R : $uint<8>  )
@@ -56,25 +76,37 @@ $is
     $merge $entry $loopback 
     $phi C := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nC $on   $loopback 
     // type of target is $uint<8>
-    $phi val_even := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_even $on   $loopback 
+    $phi val_0 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_0 $on   $loopback 
     // type of target is $uint<32>
-    $phi val_odd := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_odd $on   $loopback 
+    $phi val_1 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_1 $on   $loopback 
+    // type of target is $uint<32>
+    $phi val_2 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_2 $on   $loopback 
+    // type of target is $uint<32>
+    $phi val_3 := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_3 $on   $loopback 
     // type of target is $uint<32>
     $endmerge
-    $volatile Cr := ( $slice C 7 1 )  $buffering 1
-    a_rc_even := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
-    a_rc_odd := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
-    xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
-    xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
-    $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
-    $report (dotP_odd even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
-    $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
-    $report (dotP_odd odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
-    nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
+    $volatile Cr := ( $slice C 7 2 )  $buffering 1
+    a_rc_0 := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_1 := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_2 := A_2[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_3 := A_3[R][Cr] $buffering 1// bits of buffering = 32. 
+    xval_0 := x_0[Cr] $buffering 1// bits of buffering = 32. 
+    xval_1 := x_1[Cr] $buffering 1// bits of buffering = 32. 
+    xval_2 := x_2[Cr] $buffering 1// bits of buffering = 32. 
+    xval_3 := x_3[Cr] $buffering 1// bits of buffering = 32. 
+    $volatile nval_0 := (val_0 + (a_rc_0 * xval_0)) $buffering 1
+    $report (dotP_odd_row Cr_0 			 val_0 val_0 			 a_rc_0 a_rc_0 			 xval_0 xval_0 			 nval_0 nval_0 )
+    $volatile nval_1 := (val_1 + (a_rc_1 * xval_1)) $buffering 1
+    $report (dotP_odd_row Cr_1 			 val_1 val_1 			 a_rc_1 a_rc_1 			 xval_1 xval_1 			 nval_1 nval_1 )
+    $volatile nval_2 := (val_2 + (a_rc_2 * xval_2)) $buffering 1
+    $report (dotP_odd_row Cr_2 			 val_2 val_2 			 a_rc_2 a_rc_2 			 xval_2 xval_2 			 nval_2 nval_2 )
+    $volatile nval_3 := (val_3 + (a_rc_3 * xval_3)) $buffering 1
+    $report (dotP_odd_row Cr_3 			 val_3 val_3 			 a_rc_3 a_rc_3 			 xval_3 xval_3 			 nval_3 nval_3 )
+    nC := (C + 4 ) $buffering 1// bits of buffering = 8. 
     $while (nC < 32)
   }
-  ( nval_even => nval_even  nval_odd => nval_odd )
-  result := (nval_even + nval_odd) $buffering 1// bits of buffering = 32. 
+  ( nval_0 => nval_0  nval_1 => nval_1  nval_2 => nval_2  nval_3 => nval_3 )
+  result := (nval_0 + (nval_1 + (nval_2 + nval_3))) $buffering 1// bits of buffering = 32. 
 }
 $module [global_storage_initializer_]
 $in ()
@@ -121,13 +153,21 @@ $is
     // type of target is $uint<8>
     $endmerge
     nJ := (J + 1 ) $buffering 1// bits of buffering = 8. 
-    $volatile odd_idx := (J [] 0 ) $buffering 1
-    Jr := ( $slice J 7 1 )  $buffering 1// bits of buffering = 7. 
+    $volatile J_idx := ( $slice J 1 0 )  $buffering 1
+    Jr := ( $slice J 7 2 )  $buffering 1// bits of buffering = 6. 
     aval := in_data $buffering 1// bits of buffering = 32. 
-    $guard (odd_idx) A_1[I][Jr] := aval $buffering 1// bits of buffering = 32. 
-    $guard (odd_idx) $report (readMatrix_odd odd_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
-    $guard (~odd_idx) A_0[I][Jr] := aval $buffering 1// bits of buffering = 32. 
-    $guard (~odd_idx) $report (readMatrix_even even_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $volatile J_idx_0 := (J_idx == 0 ) $buffering 1
+    $volatile J_idx_1 := (J_idx == 1 ) $buffering 1
+    $volatile J_idx_2 := (J_idx == 2 ) $buffering 1
+    $volatile J_idx_3 := (J_idx == 3 ) $buffering 1
+    $guard (J_idx_0) A_0[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (J_idx_0) $report (readMatrix_with_J_idx_0 J_idx_0 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $guard (J_idx_1) A_1[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (J_idx_1) $report (readMatrix_with_J_idx_1 J_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $guard (J_idx_2) A_2[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (J_idx_2) $report (readMatrix_with_J_idx_2 J_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $guard (J_idx_3) A_3[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (J_idx_3) $report (readMatrix_with_J_idx_3 J_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
     $if (nJ < 32) $then 
     $place[inner_loopback]
     $endif
@@ -149,11 +189,21 @@ $is
     $phi I := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nI $on   $loopback 
     // type of target is $uint<8>
     $endmerge
-    $volatile odd_idx := (I [] 0 ) $buffering 1
-    $volatile I_idx := ( $slice I 7 1 )  $buffering 1
+    $volatile I_idx := ( $slice I 1 0 )  $buffering 1
+    $volatile Ir := ( $slice I 7 2 )  $buffering 1
     temp_val := in_data $buffering 1// bits of buffering = 32. 
-    $guard (odd_idx) x_1[I_idx] := temp_val $buffering 1// bits of buffering = 32. 
-    $guard (~odd_idx) x_0[I_idx] := temp_val $buffering 1// bits of buffering = 32. 
+    $volatile I_idx_0 := (I_idx == 0 ) $buffering 1
+    $volatile I_idx_1 := (I_idx == 1 ) $buffering 1
+    $volatile I_idx_2 := (I_idx == 2 ) $buffering 1
+    $volatile I_idx_3 := (I_idx == 3 ) $buffering 1
+    $guard (I_idx_0) x_0[Ir] := temp_val $buffering 1// bits of buffering = 32. 
+    $guard (I_idx_0) $report (readInput_with_I_idx_0 I_idx_0 			 I I 			 I_idx I_idx 			 Ir Ir 			 temp_val temp_val )
+    $guard (I_idx_1) x_1[Ir] := temp_val $buffering 1// bits of buffering = 32. 
+    $guard (I_idx_1) $report (readInput_with_I_idx_1 I_idx_1 			 I I 			 I_idx I_idx 			 Ir Ir 			 temp_val temp_val )
+    $guard (I_idx_2) x_2[Ir] := temp_val $buffering 1// bits of buffering = 32. 
+    $guard (I_idx_2) $report (readInput_with_I_idx_2 I_idx_2 			 I I 			 I_idx I_idx 			 Ir Ir 			 temp_val temp_val )
+    $guard (I_idx_3) x_3[Ir] := temp_val $buffering 1// bits of buffering = 32. 
+    $guard (I_idx_3) $report (readInput_with_I_idx_3 I_idx_3 			 I I 			 I_idx I_idx 			 Ir Ir 			 temp_val temp_val )
     $volatile nI := (I + 1 ) $buffering 1
     $while (nI < 32)
   }
@@ -194,6 +244,10 @@ $is
 }
 // Memory space 0: A_0 
 // Memory space 1: A_1 
-// Memory space 2: x_0 
-// Memory space 3: x_1 
-// Memory space 4: y 
+// Memory space 2: A_2 
+// Memory space 3: A_3 
+// Memory space 4: x_0 
+// Memory space 5: x_1 
+// Memory space 6: x_2 
+// Memory space 7: x_3 
+// Memory space 8: y 

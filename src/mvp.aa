@@ -2,16 +2,24 @@
 $parameter MATRIX_ORDER 	32
 
 // storage for the matrix A
-// stores xth column st. {x mod 2 == 0 }  
-$storage A_0: $array [MATRIX_ORDER][{MATRIX_ORDER/2}] $of $uint<32>
-// stores xth column st. {x mod 2 == 1 }  
-$storage A_1: $array [MATRIX_ORDER][{MATRIX_ORDER/2}] $of $uint<32>
+// stores xth column st. {x mod 4 == 0 }  
+$storage A_0: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 1 }  
+$storage A_1: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 2 }  
+$storage A_2: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
+// stores xth column st. {x mod 4 == 3 }  
+$storage A_3: $array [MATRIX_ORDER][{MATRIX_ORDER/4}] $of $uint<32>
 
 // storage for input vector x
-// stores ith value st. {i mod 2 == 0 }
-$storage x_0: $array [{MATRIX_ORDER/2}] $of $uint<32>
-// stores ith value st. {i mod 2 == 1 }
-$storage x_1: $array [{MATRIX_ORDER/2}] $of $uint<32>
+// stores ith value st. {i mod 4 == 0 }
+$storage x_0: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 1 }
+$storage x_1: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 2 }
+$storage x_2: $array [{MATRIX_ORDER/4}] $of $uint<32>
+// stores ith value st. {i mod 4 == 3 }
+$storage x_3: $array [{MATRIX_ORDER/4}] $of $uint<32>
 
 // storage for output vector y.
 $storage y: $array [MATRIX_ORDER] $of $uint<32>
@@ -38,17 +46,29 @@ $module [readMatrix] $in () $out () $is
 			$endmerge 
 			nJ := (J + 1)
 
-			$volatile odd_idx := (J [] 0)
-			Jr := ($slice J 7 1)
+			$volatile J_idx := ($slice J 1 0)
+			Jr := ($slice J 7 2)
 
 			aval := in_data
-			$guard (odd_idx) A_1[I][Jr] := aval
-			$guard (odd_idx)
-				$rreport (readMatrix_odd  odd_idx I J Jr aval)
 
-			$guard (~odd_idx) A_0[I][Jr] := aval
-			$guard (~odd_idx)
-				$rreport (readMatrix_even  even_idx I J Jr aval)
+			$volatile J_idx_0 := (J_idx == 0)
+			$volatile J_idx_1 := (J_idx == 1)
+			$volatile J_idx_2 := (J_idx == 2)
+			$volatile J_idx_3 := (J_idx == 3)
+
+			// Assign A matrix to A0, A1, A2, A3 storages
+
+			$guard (J_idx_0) A_0[I][Jr] := aval
+			$guard (J_idx_0) $rreport (readMatrix_with_J_idx_0   J_idx_0 I J Jr aval)
+
+			$guard (J_idx_1) A_1[I][Jr] := aval
+			$guard (J_idx_1) $rreport (readMatrix_with_J_idx_1  J_idx I J Jr aval)
+
+			$guard (J_idx_2) A_2[I][Jr] := aval
+			$guard (J_idx_2) $rreport (readMatrix_with_J_idx_2  J_idx I J Jr aval)
+
+			$guard (J_idx_3) A_3[I][Jr] := aval
+			$guard (J_idx_3) $rreport (readMatrix_with_J_idx_3  J_idx I J Jr aval)
 
 
 			$if (nJ < MATRIX_ORDER) $then
@@ -70,12 +90,27 @@ $module [readVector] $in () $out () $is
 				$phi I := ($bitcast ($uint<8>) 0) $on $entry nI $on $loopback
 			$endmerge 
 
-			$volatile odd_idx := (I [] 0)
-			$volatile I_idx := ($slice I 7 1)
+			$volatile I_idx := ($slice I 1 0)
+			$volatile Ir := ($slice I 7 2)
 
 			temp_val := in_data
-			$guard (odd_idx) x_1[I_idx] := temp_val
-			$guard (~odd_idx) x_0[I_idx] := temp_val
+
+			$volatile I_idx_0 := (I_idx == 0)
+			$volatile I_idx_1 := (I_idx == 1)
+			$volatile I_idx_2 := (I_idx == 2)
+			$volatile I_idx_3 := (I_idx == 3)
+
+			$guard (I_idx_0) x_0[Ir] := temp_val
+			$guard (I_idx_0) $rreport (readInput_with_I_idx_0   I_idx_0 I I_idx Ir temp_val)
+
+			$guard (I_idx_1) x_1[Ir] := temp_val
+			$guard (I_idx_1) $rreport (readInput_with_I_idx_1   I_idx_1 I I_idx Ir temp_val)
+
+			$guard (I_idx_2) x_2[Ir] := temp_val
+			$guard (I_idx_2) $rreport (readInput_with_I_idx_2   I_idx_2 I I_idx Ir temp_val)
+
+			$guard (I_idx_3) x_3[Ir] := temp_val
+			$guard (I_idx_3) $rreport (readInput_with_I_idx_3   I_idx_3 I I_idx Ir temp_val)
 
 			$volatile nI := (I + 1)
 		$while (nI < MATRIX_ORDER)
@@ -103,31 +138,42 @@ $module [dotP_even] $in (R: $uint<8>) $out (result: $uint<32>) $is
 		$dopipeline $depth 15 $fullrate
 			$merge $entry $loopback 
 				$phi C := ($bitcast ($uint<8>) 0) $on $entry nC $on $loopback
-				$phi val_even := ($bitcast ($uint<32>) 0) $on $entry nval_even $on $loopback
-				$phi val_odd := ($bitcast ($uint<32>) 0) $on $entry nval_odd $on $loopback
+				$phi val_0 := ($bitcast ($uint<32>) 0) $on $entry nval_0 $on $loopback
+				$phi val_1 := ($bitcast ($uint<32>) 0) $on $entry nval_1 $on $loopback
+				$phi val_2 := ($bitcast ($uint<32>) 0) $on $entry nval_2 $on $loopback
+				$phi val_3 := ($bitcast ($uint<32>) 0) $on $entry nval_3 $on $loopback
 			$endmerge
 
-			$volatile Cr := ($slice C 7 1)
+			$volatile Cr := ($slice C 7 2)
 
-			// Pipelined memory reads
-			a_rc_even := A_0[R][Cr]
-			a_rc_odd := A_1[R][Cr]
+			// Parallel reads from different memories
+			a_rc_0 := A_0[R][Cr]
+			a_rc_1 := A_1[R][Cr]
+			a_rc_2 := A_2[R][Cr]
+			a_rc_3 := A_3[R][Cr]
 
-			xval_even := x_0[Cr]
-			xval_odd := x_1[Cr]
+			xval_0 := x_0[Cr]
+			xval_1 := x_1[Cr]
+			xval_2 := x_2[Cr]
+			xval_3 := x_3[Cr]
 
-			$volatile nval_even := (val_even + (a_rc_even * xval_even))
-			$rreport (dotP_even even val_even a_rc_even xval_even nval_even)
+			$volatile nval_0 := (val_0 + (a_rc_0 * xval_0))
+			$rreport (dotP_even_row Cr_0 val_0 a_rc_0 xval_0 nval_0)
 
-			$volatile nval_odd := (val_odd + (a_rc_odd * xval_odd))
-			$rreport (dotP_even odd val_odd a_rc_odd xval_odd nval_odd)
+			$volatile nval_1 := (val_1 + (a_rc_1 * xval_1))
+			$rreport (dotP_even_row Cr_1 val_1 a_rc_1 xval_1 nval_1)
 
+			$volatile nval_2 := (val_2 + (a_rc_2 * xval_2))
+			$rreport (dotP_even_row Cr_2 val_2 a_rc_2 xval_2 nval_2)
 
-			nC := (C + 2)
+			$volatile nval_3 := (val_3 + (a_rc_3 * xval_3))
+			$rreport (dotP_even_row Cr_3 val_3 a_rc_3 xval_3 nval_3)
+
+			nC := (C + 4)
 
 		$while (nC < MATRIX_ORDER)
-	} (nval_even => nval_even nval_odd => nval_odd)
-	result := (nval_even + nval_odd)
+	} (nval_0=>nval_0 nval_1=>nval_1 nval_2=>nval_2 nval_3=>nval_3 )
+	result := ( nval_0 + (nval_1 + (nval_2 + nval_3) ) )
 }
 
 $module [dotP_odd] $in (R: $uint<8>) $out (result: $uint<32>) $is
@@ -136,31 +182,42 @@ $module [dotP_odd] $in (R: $uint<8>) $out (result: $uint<32>) $is
 		$dopipeline $depth 15 $fullrate
 			$merge $entry $loopback 
 				$phi C := ($bitcast ($uint<8>) 0) $on $entry nC $on $loopback
-				$phi val_even := ($bitcast ($uint<32>) 0) $on $entry nval_even $on $loopback
-				$phi val_odd := ($bitcast ($uint<32>) 0) $on $entry nval_odd $on $loopback
+				$phi val_0 := ($bitcast ($uint<32>) 0) $on $entry nval_0 $on $loopback
+				$phi val_1 := ($bitcast ($uint<32>) 0) $on $entry nval_1 $on $loopback
+				$phi val_2 := ($bitcast ($uint<32>) 0) $on $entry nval_2 $on $loopback
+				$phi val_3 := ($bitcast ($uint<32>) 0) $on $entry nval_3 $on $loopback
 			$endmerge
 
-			$volatile Cr := ($slice C 7 1)
+			$volatile Cr := ($slice C 7 2)
 
-			// Pipelined memory reads
-			a_rc_even := A_0[R][Cr]
-			a_rc_odd := A_1[R][Cr]
+			// Parallel reads from different memories
+			a_rc_0 := A_0[R][Cr]
+			a_rc_1 := A_1[R][Cr]
+			a_rc_2 := A_2[R][Cr]
+			a_rc_3 := A_3[R][Cr]
 
-			xval_even := x_0[Cr]
-			xval_odd := x_1[Cr]
+			xval_0 := x_0[Cr]
+			xval_1 := x_1[Cr]
+			xval_2 := x_2[Cr]
+			xval_3 := x_3[Cr]
 
-			$volatile nval_even := (val_even + (a_rc_even * xval_even))
-			$rreport (dotP_odd even val_even a_rc_even xval_even nval_even)
+			$volatile nval_0 := (val_0 + (a_rc_0 * xval_0))
+			$rreport (dotP_odd_row Cr_0 val_0 a_rc_0 xval_0 nval_0)
 
-			$volatile nval_odd := (val_odd + (a_rc_odd * xval_odd))
-			$rreport (dotP_odd odd val_odd a_rc_odd xval_odd nval_odd)
+			$volatile nval_1 := (val_1 + (a_rc_1 * xval_1))
+			$rreport (dotP_odd_row Cr_1 val_1 a_rc_1 xval_1 nval_1)
 
+			$volatile nval_2 := (val_2 + (a_rc_2 * xval_2))
+			$rreport (dotP_odd_row Cr_2 val_2 a_rc_2 xval_2 nval_2)
 
-			nC := (C + 2)
+			$volatile nval_3 := (val_3 + (a_rc_3 * xval_3))
+			$rreport (dotP_odd_row Cr_3 val_3 a_rc_3 xval_3 nval_3)
+
+			nC := (C + 4)
 
 		$while (nC < MATRIX_ORDER)
-	} (nval_even => nval_even nval_odd => nval_odd)
-	result := (nval_even + nval_odd)
+	} (nval_0=>nval_0 nval_1=>nval_1 nval_2=>nval_2 nval_3=>nval_3 )
+	result := ( nval_0 + (nval_1 + (nval_2 + nval_3) ) )
 }
 
 

@@ -1,0 +1,165 @@
+$storage  A_0 : $array[32][16] $of $uint<32> // memory space index = 0  base address = 0  word size = 32
+// can point into 
+$storage  A_1 : $array[32][16] $of $uint<32> // memory space index = 1  base address = 0  word size = 32
+// can point into 
+$pipe  in_data : $uint<32>  $depth 2 
+// can point into 
+$pipe  out_data : $uint<32>  $depth 2 
+// can point into 
+$storage  x_0 : $array[16] $of $uint<32> // memory space index = 2  base address = 0  word size = 32
+// can point into 
+$storage  x_1 : $array[16] $of $uint<32> // memory space index = 3  base address = 0  word size = 32
+// can point into 
+$storage  y : $array[32] $of $uint<32> // memory space index = 4  base address = 0  word size = 32
+// can point into 
+$module [dotP]
+$in ( R : $uint<8>  )
+$out ( result : $uint<32>  )
+$is
+{
+  $branchblock [mmloop]
+  {
+    $dopipeline $depth 15 $buffering 1
+    $fullrate 
+    $merge $entry $loopback 
+    $phi C := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nC $on   $loopback 
+    // type of target is $uint<8>
+    $phi val_even := 			  nval_even $on   $loopback 			  ($bitcast ($uint<32>) 0  ) $on   $entry 
+    // type of target is $uint<32>
+    $phi val_odd := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_odd $on   $loopback 
+    // type of target is $uint<32>
+    $endmerge
+    $volatile Cr := ( $slice C 7 1 )  $buffering 1
+    a_rc_even := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_odd := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
+    xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
+    xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
+    $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
+    $report (dotP even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
+    $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
+    $report (dotP odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
+    nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
+    $while (nC < 32)
+  }
+  ( nval_even => nval_even  nval_odd => nval_odd )
+  result := (nval_even + nval_odd) $buffering 1// bits of buffering = 32. 
+}
+$module [global_storage_initializer_]
+$in ()
+$out ()
+$is
+{
+  $null
+}
+$module [multiplyMatrixVector]
+$in ()
+$out ()
+$is
+{
+  $branchblock [mmloop]
+  {
+    $merge $entry loopback 
+    $phi R := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nR $on   loopback 
+    // type of target is $uint<8>
+    $endmerge
+    $call dotP (R ) (val ) 
+    y[R] := val $buffering 1// bits of buffering = 32. 
+    nR := (R + 1 ) $buffering 1// bits of buffering = 8. 
+    $if (nR < 32) $then 
+    $place[loopback]
+    $endif
+  }
+}
+$module [readMatrix]
+$in ()
+$out ()
+$is
+{
+  $branchblock [mRead]
+  {
+    $merge $entry outer_loopback 
+    $phi I := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nI $on   outer_loopback 
+    // type of target is $uint<8>
+    $endmerge
+    nI := (I + 1 ) $buffering 1// bits of buffering = 8. 
+    $merge $entry inner_loopback 
+    $phi J := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nJ $on   inner_loopback 
+    // type of target is $uint<8>
+    $endmerge
+    nJ := (J + 1 ) $buffering 1// bits of buffering = 8. 
+    $volatile odd_idx := (J [] 0 ) $buffering 1
+    Jr := ( $slice J 7 1 )  $buffering 1// bits of buffering = 7. 
+    aval := in_data $buffering 1// bits of buffering = 32. 
+    $guard (odd_idx) A_1[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (odd_idx) $report (readMatrix_odd odd_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $guard (~odd_idx) A_0[I][Jr] := aval $buffering 1// bits of buffering = 32. 
+    $guard (~odd_idx) $report (readMatrix_even even_idx 		 I I 		 J J 		 Jr Jr 		 aval aval )
+    $if (nJ < 32) $then 
+    $place[inner_loopback]
+    $endif
+    $if (nI < 32) $then 
+    $place[outer_loopback]
+    $endif
+  }
+}
+$module [readVector]
+$in ()
+$out ()
+$is
+{
+  $branchblock [loop]
+  {
+    $dopipeline $depth 7 $buffering 1
+    $fullrate 
+    $merge $entry $loopback 
+    $phi I := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nI $on   $loopback 
+    // type of target is $uint<8>
+    $endmerge
+    $volatile odd_idx := (I [] 0 ) $buffering 1
+    $volatile I_idx := ( $slice I 7 1 )  $buffering 1
+    temp_val := in_data $buffering 1// bits of buffering = 32. 
+    $guard (odd_idx) x_1[I_idx] := temp_val $buffering 1// bits of buffering = 32. 
+    $guard (~odd_idx) x_0[I_idx] := temp_val $buffering 1// bits of buffering = 32. 
+    $volatile nI := (I + 1 ) $buffering 1
+    $while (nI < 32)
+  }
+}
+$module [sendVector]
+$in ()
+$out ()
+$is
+{
+  $branchblock [loop]
+  {
+    $dopipeline $depth 7 $buffering 1
+    $fullrate 
+    $merge $entry $loopback 
+    $phi I := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nI $on   $loopback 
+    // type of target is $uint<8>
+    $endmerge
+    out_data := y[I] $buffering 1// bits of buffering = 32. 
+    $volatile nI := (I + 1 ) $buffering 1
+    $while (nI < 32)
+  }
+}
+$module [mvp_daemon]
+$in ()
+$out ()
+$is
+{
+  $call readMatrix () () 
+  $branchblock [loop]
+  {
+    $merge $entry loopback 
+    $endmerge
+    $call readVector () () 
+    $call multiplyMatrixVector () () 
+    $call sendVector () () 
+    $place[loopback]
+  }
+}
+// Memory space 0: A_0 
+// Memory space 1: A_1 
+// Memory space 2: x_0 
+// Memory space 3: x_1 
+// Memory space 4: y 

@@ -82,9 +82,9 @@ $module [dotP_even]
   //  file .Aa/mvp.opt.aa, line 15
   // pipe-declarations for block %dotP_even%mmloop
   //  file .Aa/mvp.opt.aa, line 20
+  // memory-space 1 is read from.
   // memory-space 3 is read from.
   // memory-space 2 is read from.
-  // memory-space 1 is read from.
   // memory-space 0 is read from.
   // there are no memory spaces local to this module.
   $CP 
@@ -1068,6 +1068,10 @@ $module [dotP_even]
           // done: Forward dependencies from (nC < 32 ) to transition condition_evaluated
           condition_evaluated &-> ($null)
           // load-store dependencies..
+          // memory-space  memory_space_1
+          //  array_obj_ref_47 load
+          // reenable across ring for memory space memory_space_1
+          // leading and trailing sets are the same... no ring dependency
           // memory-space  memory_space_3
           //  array_obj_ref_55 load
           // reenable across ring for memory space memory_space_3
@@ -1075,10 +1079,6 @@ $module [dotP_even]
           // memory-space  memory_space_2
           //  array_obj_ref_51 load
           // reenable across ring for memory space memory_space_2
-          // leading and trailing sets are the same... no ring dependency
-          // memory-space  memory_space_1
-          //  array_obj_ref_47 load
-          // reenable across ring for memory space memory_space_1
           // leading and trailing sets are the same... no ring dependency
           // memory-space  memory_space_0
           //  array_obj_ref_42 load
@@ -1597,9 +1597,9 @@ $module [dotP_odd]
   //  file .Aa/mvp.opt.aa, line 49
   // pipe-declarations for block %dotP_odd%mmloop
   //  file .Aa/mvp.opt.aa, line 54
+  // memory-space 1 is read from.
   // memory-space 3 is read from.
   // memory-space 2 is read from.
-  // memory-space 1 is read from.
   // memory-space 0 is read from.
   // there are no memory spaces local to this module.
   $CP 
@@ -2583,6 +2583,10 @@ $module [dotP_odd]
           // done: Forward dependencies from (nC < 32 ) to transition condition_evaluated
           condition_evaluated &-> ($null)
           // load-store dependencies..
+          // memory-space  memory_space_1
+          //  array_obj_ref_138 load
+          // reenable across ring for memory space memory_space_1
+          // leading and trailing sets are the same... no ring dependency
           // memory-space  memory_space_3
           //  array_obj_ref_146 load
           // reenable across ring for memory space memory_space_3
@@ -2590,10 +2594,6 @@ $module [dotP_odd]
           // memory-space  memory_space_2
           //  array_obj_ref_142 load
           // reenable across ring for memory space memory_space_2
-          // leading and trailing sets are the same... no ring dependency
-          // memory-space  memory_space_1
-          //  array_obj_ref_138 load
-          // reenable across ring for memory space memory_space_1
           // leading and trailing sets are the same... no ring dependency
           // memory-space  memory_space_0
           //  array_obj_ref_133 load
@@ -3410,13 +3410,13 @@ $module [multiplyMatrixVector]
         // array_obj_ref_215(store) -> array_obj_ref_221(store)
         array_obj_ref_221_sample_start_ <-& (array_obj_ref_215_array_obj_ref_221_delay)
         array_obj_ref_215_array_obj_ref_221_delay <-& (array_obj_ref_215_sample_completed_)
+        // memory-space  memory_space_1
+        //  call_stmt_208 load
+        //  call_stmt_213 load
         // memory-space  memory_space_3
         //  call_stmt_208 load
         //  call_stmt_213 load
         // memory-space  memory_space_2
-        //  call_stmt_208 load
-        //  call_stmt_213 load
-        // memory-space  memory_space_1
         //  call_stmt_208 load
         //  call_stmt_213 load
         // memory-space  memory_space_0
@@ -5945,6 +5945,8 @@ $module [mvp_daemon]
         // call_stmt_386(store) -> call_stmt_387(load)
         call_stmt_387_sample_start_ <-& (call_stmt_386_call_stmt_387_delay)
         call_stmt_386_call_stmt_387_delay <-& (call_stmt_386_update_completed_)
+        // memory-space  memory_space_1
+        //  call_stmt_386 load
         // memory-space  memory_space_3
         //  call_stmt_385 store
         //  call_stmt_386 load
@@ -5959,8 +5961,6 @@ $module [mvp_daemon]
         // call_stmt_385(store) -> call_stmt_386(load)
         call_stmt_386_sample_start_ <-& (call_stmt_385_call_stmt_386_delay)
         call_stmt_385_call_stmt_386_delay <-& (call_stmt_385_update_completed_)
-        // memory-space  memory_space_1
-        //  call_stmt_386 load
         // memory-space  memory_space_0
         //  call_stmt_386 load
         // pipe read/write dependencies for pipe in_data

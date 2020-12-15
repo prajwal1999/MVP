@@ -35,9 +35,9 @@ $is
     xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
     xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
     $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
-    $report (dotP even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
+    $report (dotP_even even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
     $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
-    $report (dotP odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
+    $report (dotP_even odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
     nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
     $while (nC < 32)
   }
@@ -67,9 +67,9 @@ $is
     xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
     xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
     $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
-    $report (dotP even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
+    $report (dotP_odd even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
     $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
-    $report (dotP odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
+    $report (dotP_odd odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
     nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
     $while (nC < 32)
   }

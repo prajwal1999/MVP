@@ -12,7 +12,7 @@ $storage  x_1 : $array[16] $of $uint<32> // memory space index = 3  base address
 // can point into 
 $storage  y : $array[32] $of $uint<32> // memory space index = 4  base address = 0  word size = 32
 // can point into 
-$module [dotP]
+$module [dotP_even]
 $in ( R : $uint<8>  )
 $out ( result : $uint<32>  )
 $is
@@ -25,6 +25,38 @@ $is
     $phi C := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nC $on   $loopback 
     // type of target is $uint<8>
     $phi val_even := 			  nval_even $on   $loopback 			  ($bitcast ($uint<32>) 0  ) $on   $entry 
+    // type of target is $uint<32>
+    $phi val_odd := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_odd $on   $loopback 
+    // type of target is $uint<32>
+    $endmerge
+    $volatile Cr := ( $slice C 7 1 )  $buffering 1
+    a_rc_even := A_0[R][Cr] $buffering 1// bits of buffering = 32. 
+    a_rc_odd := A_1[R][Cr] $buffering 1// bits of buffering = 32. 
+    xval_even := x_0[Cr] $buffering 1// bits of buffering = 32. 
+    xval_odd := x_1[Cr] $buffering 1// bits of buffering = 32. 
+    $volatile nval_even := (val_even + (a_rc_even * xval_even)) $buffering 1
+    $report (dotP even 			 val_even val_even 			 a_rc_even a_rc_even 			 xval_even xval_even 			 nval_even nval_even )
+    $volatile nval_odd := (val_odd + (a_rc_odd * xval_odd)) $buffering 1
+    $report (dotP odd 			 val_odd val_odd 			 a_rc_odd a_rc_odd 			 xval_odd xval_odd 			 nval_odd nval_odd )
+    nC := (C + 2 ) $buffering 1// bits of buffering = 8. 
+    $while (nC < 32)
+  }
+  ( nval_even => nval_even  nval_odd => nval_odd )
+  result := (nval_even + nval_odd) $buffering 1// bits of buffering = 32. 
+}
+$module [dotP_odd]
+$in ( R : $uint<8>  )
+$out ( result : $uint<32>  )
+$is
+{
+  $branchblock [mmloop]
+  {
+    $dopipeline $depth 15 $buffering 1
+    $fullrate 
+    $merge $entry $loopback 
+    $phi C := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nC $on   $loopback 
+    // type of target is $uint<8>
+    $phi val_even := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_even $on   $loopback 
     // type of target is $uint<32>
     $phi val_odd := 			  ($bitcast ($uint<32>) 0  ) $on   $entry 			  nval_odd $on   $loopback 
     // type of target is $uint<32>
@@ -62,8 +94,10 @@ $is
     $phi R := 			  ($bitcast ($uint<8>) 0  ) $on   $entry 			  nR $on   loopback 
     // type of target is $uint<8>
     $endmerge
-    $call dotP (R ) (val ) 
-    y[R] := val $buffering 1// bits of buffering = 32. 
+    $call dotP_even (R ) (val_even ) 
+    $call dotP_odd ((R + 1 ) ) (val_odd ) 
+    y[R] := val_even $buffering 1// bits of buffering = 32. 
+    y[(R + 1 )] := val_odd $buffering 1// bits of buffering = 32. 
     nR := (R + 1 ) $buffering 1// bits of buffering = 8. 
     $if (nR < 32) $then 
     $place[loopback]

@@ -1,7 +1,18 @@
 #include <vhdlCStubs.h>
-uint32_t dotP(uint8_t R)
+uint32_t dotP_even(uint8_t R)
 {
-char buffer[1024];  char* ss;  sprintf(buffer, "call dotP ");
+char buffer[1024];  char* ss;  sprintf(buffer, "call dotP_even ");
+append_int(buffer,1); ADD_SPACE__(buffer);
+append_uint8_t(buffer,R); ADD_SPACE__(buffer);
+append_int(buffer,1); ADD_SPACE__(buffer);
+append_int(buffer,32); ADD_SPACE__(buffer);
+send_packet_and_wait_for_response(buffer,strlen(buffer)+1,"localhost",9999);
+uint32_t result = get_uint32_t(buffer,&ss);
+return(result);
+}
+uint32_t dotP_odd(uint8_t R)
+{
+char buffer[1024];  char* ss;  sprintf(buffer, "call dotP_odd ");
 append_int(buffer,1); ADD_SPACE__(buffer);
 append_uint8_t(buffer,R); ADD_SPACE__(buffer);
 append_int(buffer,1); ADD_SPACE__(buffer);

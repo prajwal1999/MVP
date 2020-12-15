@@ -1,6 +1,0 @@
-digraph data_path {
-  call_stmt_281_call [shape=rectangle];
-  call_stmt_284_call [shape=rectangle];
-  call_stmt_285_call [shape=rectangle];
-  call_stmt_286_call [shape=rectangle];
-}

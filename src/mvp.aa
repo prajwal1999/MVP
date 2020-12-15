@@ -97,7 +97,40 @@ $module [sendVector] $in () $out () $is
 }
 
 // dot product of the R'th row of A with the vector x. This gives the R'th element of Y.
-$module [dotP] $in (R: $uint<8>) $out (result: $uint<32>) $is
+$module [dotP_even] $in (R: $uint<8>) $out (result: $uint<32>) $is
+{
+	$branchblock[mmloop] {
+		$dopipeline $depth 15 $fullrate
+			$merge $entry $loopback 
+				$phi C := ($bitcast ($uint<8>) 0) $on $entry nC $on $loopback
+				$phi val_even := ($bitcast ($uint<32>) 0) $on $entry nval_even $on $loopback
+				$phi val_odd := ($bitcast ($uint<32>) 0) $on $entry nval_odd $on $loopback
+			$endmerge
+
+			$volatile Cr := ($slice C 7 1)
+
+			// Pipelined memory reads
+			a_rc_even := A_0[R][Cr]
+			a_rc_odd := A_1[R][Cr]
+
+			xval_even := x_0[Cr]
+			xval_odd := x_1[Cr]
+
+			$volatile nval_even := (val_even + (a_rc_even * xval_even))
+			$rreport (dotP even val_even a_rc_even xval_even nval_even)
+
+			$volatile nval_odd := (val_odd + (a_rc_odd * xval_odd))
+			$rreport (dotP odd val_odd a_rc_odd xval_odd nval_odd)
+
+
+			nC := (C + 2)
+
+		$while (nC < MATRIX_ORDER)
+	} (nval_even => nval_even nval_odd => nval_odd)
+	result := (nval_even + nval_odd)
+}
+
+$module [dotP_odd] $in (R: $uint<8>) $out (result: $uint<32>) $is
 {
 	$branchblock[mmloop] {
 		$dopipeline $depth 15 $fullrate
@@ -140,8 +173,11 @@ $module [multiplyMatrixVector] $in () $out () $is
 			$phi R := ($bitcast ($uint<8>) 0) $on $entry nR $on loopback
 		$endmerge
 
-			$call dotP (R) (val)
-			y[R] := val
+			$call dotP_even (R) (val_even)
+			$call dotP_odd ((R+1)) (val_odd)
+
+			y[R] := val_even
+			y[(R+1)] := val_odd
 
 			nR := (R + 1)
 		$if (nR < MATRIX_ORDER) $then

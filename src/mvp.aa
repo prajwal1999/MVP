@@ -117,10 +117,10 @@ $module [dotP_even] $in (R: $uint<8>) $out (result: $uint<32>) $is
 			xval_odd := x_1[Cr]
 
 			$volatile nval_even := (val_even + (a_rc_even * xval_even))
-			$rreport (dotP even val_even a_rc_even xval_even nval_even)
+			$rreport (dotP_even even val_even a_rc_even xval_even nval_even)
 
 			$volatile nval_odd := (val_odd + (a_rc_odd * xval_odd))
-			$rreport (dotP odd val_odd a_rc_odd xval_odd nval_odd)
+			$rreport (dotP_even odd val_odd a_rc_odd xval_odd nval_odd)
 
 
 			nC := (C + 2)
@@ -150,10 +150,10 @@ $module [dotP_odd] $in (R: $uint<8>) $out (result: $uint<32>) $is
 			xval_odd := x_1[Cr]
 
 			$volatile nval_even := (val_even + (a_rc_even * xval_even))
-			$rreport (dotP even val_even a_rc_even xval_even nval_even)
+			$rreport (dotP_odd even val_even a_rc_even xval_even nval_even)
 
 			$volatile nval_odd := (val_odd + (a_rc_odd * xval_odd))
-			$rreport (dotP odd val_odd a_rc_odd xval_odd nval_odd)
+			$rreport (dotP_odd odd val_odd a_rc_odd xval_odd nval_odd)
 
 
 			nC := (C + 2)

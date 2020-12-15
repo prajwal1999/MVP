@@ -236,7 +236,7 @@ $module [multiplyMatrixVector] $in () $out () $is
 			y[R] := val_even
 			y[(R+1)] := val_odd
 
-			nR := (R + 1)
+			nR := (R + 2)
 		$if (nR < MATRIX_ORDER) $then
 			$place [loopback]
 		$endif
